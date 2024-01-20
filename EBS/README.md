@@ -194,3 +194,24 @@ Em configurações avançadas, é possível:
 * Criar cópias entre regiões.
 
 ![](../Imagens/ebs-dlm-7.png)
+
+---
+
+### 6. Outras informações
+
+* Alguns tipos de volumes (io1 ou io2) suportam o recurso **Multi-Attach**, o que permite anexar o mesmo volume a várias instâncias EC2 na mesma AZ. Cada instância à qual o volume está anexado tem permissão completa de leitura e escrita no volume compartilhado, entretando, o volume só pode ser anexado a até 16 instâncias Linux criadas no **Sistema Nitro** (coleção de hardware e componentes de software criados pela AWS que permitem alta performance, alta disponibilidade e alta segurança);
+
+* Amazon EC2 permite substituir o volume raiz do EBS para uma instância em execução sem terminá-la. A instância é reiniciada automaticamente quando o volume raiz é substituído e o conteúdo da RAM é apagado durante a reinicialização. Não é possível substituir o volume raiz se a instância for **Instance Store Backed**;
+
+* É possível configurar o **Delete on Termination** para que ao terminar a instância, o volume também seja apagado. Por default, o volume raiz da instância vem com esse atributo marcado e os volumes adicionais não.
+
+![](../Imagens/ebs-terminate.png)
+
+* EBS Elastic Volumes: é possível modificar seu volume sem fazer o detach do volume ou restartar a instância. Você consegue aumentar o tamanho do volume (somente aumentar, não consegue diminuir), alterar o volume type para um tipo mais potente (`gp2` -> `gp3`), aumentar IOPs ou Throughput.
+
+---
+
+### 7. Custos
+
+![](../Imagens/ebs-pricing.png)
+
