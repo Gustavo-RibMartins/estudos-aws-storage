@@ -107,3 +107,90 @@ Ao excluir um snapshot, somente os dados excluídos desse snapshot serão removi
 - **State 3**: O SNAP A é excluído. O que ocorre, é que os 6 GB de dados que eram apenas referenciados, foram movidos para o SNAP B. Dessa forma, agora há 10 GB de dados armazenados no S3, o que muda é que você não possui mais a "versão original" dos 4 GB de dados modificados no State 2.
 
 ---
+
+### 5. Amazon Data Lifecycle Manager
+
+Te permite automatizar a criação, retenção, cópia e exclusão de snapshots e AMIs.
+
+![](../Imagens/ebs-dlm-1.png)
+
+Primeiro, é preciso dar uma descrição a sua política de ciclo de vida.
+
+![](../Imagens/ebs-dlm-2.png)
+
+Depois, você precisa selecionar uma Role do IAM para utilizar.
+
+![](../Imagens/ebs-dlm-3.png)
+
+A role padrão vem com as seguintes permissões:
+
+```json
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:CreateSnapshot",
+				"ec2:CreateSnapshots",
+				"ec2:DeleteSnapshot",
+				"ec2:DescribeInstances",
+				"ec2:DescribeVolumes",
+				"ec2:DescribeSnapshots",
+				"ec2:EnableFastSnapshotRestores",
+				"ec2:DescribeFastSnapshotRestores",
+				"ec2:DisableFastSnapshotRestores",
+				"ec2:CopySnapshot",
+				"ec2:ModifySnapshotAttribute",
+				"ec2:DescribeSnapshotAttribute",
+				"ec2:DescribeSnapshotTierStatus",
+				"ec2:ModifySnapshotTier"
+			],
+			"Resource": "*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:CreateTags"
+			],
+			"Resource": "arn:aws:ec2:*::snapshot/*"
+		},
+		{
+			"Effect": "Allow",
+			"Action": [
+				"ec2:CreateTags",
+				"events:PutRule",
+				"events:DeleteRule",
+				"events:DescribeRule",
+				"events:EnableRule",
+				"events:DisableRule",
+				"events:ListTargetsByRule",
+				"events:PutTargets",
+				"events:RemoveTargets"
+			],
+			"Resource": "arn:aws:events:*:*:rule/AwsDataLifecycleRule.managed-cwe.*"
+		}
+	]
+}
+```
+
+Em seguida, você precisa informar os detalhes do agendamento, informando a frequência com que os snapshots serão criados e por quanto tempo serão retidos.
+
+![](../Imagens/ebs-dlm-4.png)
+
+Em parâmetros de exclusão você pode informar volumes de inicialização ou volumes de tipos específicos (como `io2`, `sc1`, `gp2`, etc) para não incluílos nas rotinas de backup (como se fosse um .gitignore).
+
+![](../Imagens/ebs-dlm-5.png)
+
+Também é possível excluir volumes utilizando tags.
+No exemplo abaixo, qualquer volume que tiver a tag `Terraform=false` não terá seu backup feito.
+
+![](../Imagens/ebs-dlm-6.png)
+
+Em configurações avançadas, é possível:
+
+* Copiar as tags dos volumes;
+* Estender a exclusão até o último snapshot;
+* Criar cópias entre regiões.
+
+![](../Imagens/ebs-dlm-7.png)
